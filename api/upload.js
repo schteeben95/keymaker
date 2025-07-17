@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
         }
 
         try {
-            const parUrl = process.env.OCI_PAR_URL || "https://objectstorage.ap-sydney-1.oraclecloud.com/p/kgsGXfCfa6-ho38qARwcCOfuWLldTRYd8k-RxlHQHIamZB1xGMOuSo1XbDEG5bK7/n/sdodevxz4fp7/b/keymaker/o/";
+            const parUrl = process.env.OCI_PAR_URL;
             const objectName = `${Date.now()}-${privateKeyFile.originalFilename}`;
             const uploadUrl = `${parUrl}${objectName}`;
 

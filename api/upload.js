@@ -1,5 +1,5 @@
 const formidable = require('formidable');
-const fs = require('fs');
+const fs = require('fs').promises;
 const axios = require('axios');
 
 module.exports = async (req, res) => {
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
             const objectName = `${Date.now()}-${privateKeyFile.originalFilename}`;
             const uploadUrl = `${parUrl}${objectName}`;
 
-            const fileContent = fs.createReadStream(privateKeyFile.filepath);
+            const fileContent = await fs.readFile(privateKeyFile.filepath);
 
             await axios.put(uploadUrl, fileContent, {
                 headers: {

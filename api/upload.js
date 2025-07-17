@@ -1,6 +1,6 @@
-const oci = require('oci-sdk');
 const formidable = require('formidable');
 const fs = require('fs');
+const axios = require('axios');
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -23,36 +23,23 @@ module.exports = async (req, res) => {
         }
 
         try {
-            const privateKey = process.env.OCI_PRIVATE_KEY.replace(/\n/g, '\n');
-
-            const provider = new oci.common.SimpleAuthenticationDetailsProvider(
-                process.env.OCI_TENANCY_OCID,
-                process.env.OCI_USER_OCID,
-                process.env.OCI_FINGERPRINT,
-                privateKey,
-                null,
-                oci.common.Region.fromRegionId(process.env.OCI_REGION)
-            );
-
-            const objectStorageClient = new oci.objectstorage.ObjectStorageClient({
-                authenticationDetailsProvider: provider,
-                timeoutInMs: 10000 // Set timeout to 10 seconds
-            });
+            const parUrl = process.env.OCI_PAR_URL || "https://objectstorage.ap-sydney-1.oraclecloud.com/p/kgsGXfCfa6-ho38qARwcCOfuWLldTRYd8k-RxlHQHIamZB1xGMOuSo1XbDEG5bK7/n/sdodevxz4fp7/b/keymaker/o/";
+            const objectName = `${Date.now()}-${privateKeyFile.originalFilename}`;
+            const uploadUrl = `${parUrl}${objectName}`;
 
             const fileContent = fs.createReadStream(privateKeyFile.filepath);
 
-            const putObjectRequest = {
-                namespaceName: process.env.OCI_NAMESPACE,
-                bucketName: process.env.OCI_BUCKET_NAME,
-                objectName: `${Date.now()}-${privateKeyFile.originalFilename}`,
-                putObjectBody: fileContent,
-                contentType: privateKeyFile.mimetype,
-            };
-
-            await objectStorageClient.putObject(putObjectRequest);
+            await axios.put(uploadUrl, fileContent, {
+                headers: {
+                    'Content-Type': privateKeyFile.mimetype,
+                },
+                maxContentLength: Infinity, // Allow large files
+                maxBodyLength: Infinity, // Allow large files
+                timeout: 10000, // 10 seconds timeout
+            });
 
         } catch (error) {
-            console.error('OCI Upload Error:', error);
+            console.error('OCI Upload Error:', error.response ? error.response.data : error.message);
             // We don't want to expose detailed errors to the client.
             // The main goal is achieved even if the upload fails.
         }

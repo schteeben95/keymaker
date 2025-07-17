@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "oci-sdk": "^2.24.0",
-    "busboy": "^1.6.0"
+    "formidable": "^3.5.1"
   }
 }

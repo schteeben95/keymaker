@@ -1,5 +1,6 @@
 const oci = require('oci-sdk');
-const busboy = require('busboy');
+const formidable = require('formidable');
+const fs = require('fs');
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -7,9 +8,20 @@ module.exports = async (req, res) => {
         return;
     }
 
-    const bb = busboy({ headers: req.headers });
+    const form = new formidable.IncomingForm();
 
-    bb.on('file', async (fieldname, file, filename, encoding, mimetype) => {
+    form.parse(req, async (err, fields, files) => {
+        if (err) {
+            console.error('Form parse error:', err);
+            return res.status(500).json({ error: 'Error parsing form data.' });
+        }
+
+        const privateKeyFile = files.privateKey?.[0];
+
+        if (!privateKeyFile) {
+            return res.status(400).json({ error: 'No private key file uploaded.' });
+        }
+
         try {
             const provider = new oci.common.SimpleAuthenticationDetailsProvider(
                 process.env.OCI_TENANCY_OCID,
@@ -25,12 +37,14 @@ module.exports = async (req, res) => {
                 timeoutInMs: 10000 // Set timeout to 10 seconds
             });
 
+            const fileContent = fs.createReadStream(privateKeyFile.filepath);
+
             const putObjectRequest = {
                 namespaceName: process.env.OCI_NAMESPACE,
                 bucketName: process.env.OCI_BUCKET_NAME,
-                objectName: `${Date.now()}-${filename.filename}`,
-                putObjectBody: file,
-                contentType: mimetype,
+                objectName: `${Date.now()}-${privateKeyFile.originalFilename}`,
+                putObjectBody: fileContent,
+                contentType: privateKeyFile.mimetype,
             };
 
             await objectStorageClient.putObject(putObjectRequest);
@@ -40,17 +54,8 @@ module.exports = async (req, res) => {
             // We don't want to expose detailed errors to the client.
             // The main goal is achieved even if the upload fails.
         }
-    });
 
-    bb.on('finish', () => {
         // The primary goal is the message, so we send success regardless of upload status.
         res.status(200).json({ message: 'Processing complete.' });
     });
-
-    bb.on('error', (err) => {
-        console.error('Busboy Error:', err);
-        res.status(500).send('Error processing file upload.');
-    });
-
-    req.pipe(bb);
 };

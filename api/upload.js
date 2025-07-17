@@ -20,7 +20,10 @@ module.exports = async (req, res) => {
                 oci.common.Region.fromRegionId(process.env.OCI_REGION)
             );
 
-            const objectStorageClient = new oci.objectstorage.ObjectStorageClient({ authenticationDetailsProvider: provider });
+            const objectStorageClient = new oci.objectstorage.ObjectStorageClient({
+                authenticationDetailsProvider: provider,
+                timeoutInMs: 10000 // Set timeout to 10 seconds
+            });
 
             const putObjectRequest = {
                 namespaceName: process.env.OCI_NAMESPACE,

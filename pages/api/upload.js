@@ -1,4 +1,4 @@
-import { IncomingForm } from 'next-auth/react/node_modules/formidable';
+import { IncomingForm } from 'formidable';
 import { promises as fs } from 'fs';
 import * as oci from 'oci-sdk';
 

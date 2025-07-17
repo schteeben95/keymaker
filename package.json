@@ -1,13 +1,18 @@
 {
   "name": "keymaker",
-  "version": "1.0.0",
-  "description": "A web application to check for compromised private keys.",
-  "main": "index.html",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.4.1",
     "oci-sdk": "^2.24.0",
-    "busboy": "^1.6.0"
+    "formidable": "^3.5.1"
   }
 }
